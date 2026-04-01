@@ -51,3 +51,4 @@ jobs:
         with:
           name: MediaDownloader-APK-${{ steps.get-date.outputs.date }}
           path: bin/*.apk
+          
