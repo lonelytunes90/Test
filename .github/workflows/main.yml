@@ -20,20 +20,28 @@ jobs:
       - name: Install Buildozer dependencies
         run: |
           sudo apt update
+          # Added all essential build tools for Kivy/Android
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev
-          # Install specific tools often needed by p4a
-          sudo apt install -y libltdl-dev libffi-dev libssl-dev
-          pip install --upgrade buildozer cython virtualenv
+          sudo apt install -y libltdl-dev libffi-dev libssl-dev build-essential
+          # Crucial: Use a specific Cython version compatible with Kivy 2.3.1
+          pip install --upgrade pip
+          pip install "Cython<3.0" buildozer virtualenv
 
       - name: Build with Buildozer
         run: |
-          # Use 'debug' with verbose log level to see the real error
+          # We use 'buildozer android debug' directly. 
+          # Buildozer will prompt for licenses, so we use 'yes'
           yes | buildozer -v android debug
         env:
           BUILDOZER_ALLOW_KIVY_NEW_DESIGN: 1
-          # This helps with some permission issues in GitHub Actions
+          # Fix for potential permission issues in CI
           BUILDOZER_BIN_DIR: ./bin
 
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaDownloader-APK
+          path: bin/*.apk
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
