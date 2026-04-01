@@ -20,20 +20,25 @@ jobs:
       - name: Install Buildozer dependencies
         run: |
           sudo apt update
-          # Updated libtinfo5 to libtinfo6 for Ubuntu 24.04 compatibility
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo6 cmake libffi-dev libssl-dev
-          pip install --upgrade buildozer cython
+          # Install specific tools often needed by p4a
+          sudo apt install -y libltdl-dev libffi-dev libssl-dev
+          pip install --upgrade buildozer cython virtualenv
 
       - name: Build with Buildozer
         run: |
-          # Automatically accept SDK licenses and build
-          yes | buildozer android debug
+          # Use 'debug' with verbose log level to see the real error
+          yes | buildozer -v android debug
         env:
           BUILDOZER_ALLOW_KIVY_NEW_DESIGN: 1
+          # This helps with some permission issues in GitHub Actions
+          BUILDOZER_BIN_DIR: ./bin
 
-      - name: Get Date
-        id: get-date
-        run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaDownloader-APK
+          path: bin/*.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
